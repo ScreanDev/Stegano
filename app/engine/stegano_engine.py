@@ -1,5 +1,4 @@
 from PIL import Image
-from pathlib import Path
 
 class SteganoEngine:
     def __init__(self, image_path):
