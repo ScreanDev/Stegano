@@ -12,6 +12,9 @@ class SteganoEngine:
         self.final_img = Image.new('RGB', (self.width, self.height), color='black')
 
     def encode_message(self, message):
+
+        # We add this marker at the end to indicate the end of the message
+        message += str("\x00")
         # Convert each character from the provided message to its ASCII code,
         # then for each, that ASCII code to 8-bit binary.
         binary_message = ''.join(format(ord(char), '08b') for char in message)
@@ -32,13 +35,31 @@ class SteganoEngine:
                     else:
                         rgb_code = (rgb_code[0] - 1, rgb_code[1], rgb_code[2])
                 
+                
                 # Print the new pixel color to our final image
                 self.final_img.putpixel((px, py), rgb_code)
 
                 if len(binary_message) - 1 > string_elt_counter:
                     string_elt_counter += 1
         
-        self.final_img.show()
+        return self.final_img
+    
+    
+    def decode_message(self, image):
+        pixels = image.load()
+        binary_retrans = ""
 
-        downloads_path = str(Path.home() / "Downloads" / self.title)
-        self.final_img.save(downloads_path, format="png")
+        for px in range(self.width):
+            for py in range(self.height):
+                rgb_code = pixels[px, py]
+                binary_retrans += str(rgb_code[0] % 2)
+
+        
+        ascii_retrans = ''
+        for i in range(0, len(binary_retrans), 8):
+            char_to_add = chr(int(binary_retrans[i:i+8], 2))
+            if char_to_add == '\x00':
+                break
+            ascii_retrans += char_to_add
+
+        return ascii_retrans
