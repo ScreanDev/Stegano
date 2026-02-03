@@ -46,18 +46,22 @@ class SteganoEngine:
     
     
     def decode_message(self, image):
+        # Get the pixel data from the provided image
         pixels = image.load()
         binary_retrans = ""
 
         for px in range(self.width):
             for py in range(self.height):
                 rgb_code = pixels[px, py]
+                # The opposite process of encoding: we get the LSB of the red channel
                 binary_retrans += str(rgb_code[0] % 2)
 
-        
+        # Now we need to convert the binary string back to ASCII
         ascii_retrans = ''
         for i in range(0, len(binary_retrans), 8):
+            # Convert each 8-bit segment to its corresponding character
             char_to_add = chr(int(binary_retrans[i:i+8], 2))
+            # Stop if we reach the end marker
             if char_to_add == '\x00':
                 break
             ascii_retrans += char_to_add
