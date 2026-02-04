@@ -7,16 +7,28 @@ class SteganoEngine:
         self.width, self.height = self.image.size
         self.title = self.image.filename.split("/")[-1].split(".")[0] + "_stegano.png"
 
+        self.signature = "STEGANO"
+        self.signature_binary_size = len(''.join(format(ord(char), '08b') for char in self.signature))
+
+        self.message_size_counter_length = 5
+
         # Create a new image with RGB mode and black background
         self.final_img = Image.new('RGB', (self.width, self.height), color='black')
 
     def encode_message(self, message):
-
-        # We add this marker at the end to indicate the end of the message
-        message += str("\x00")
         # Convert each character from the provided message to its ASCII code,
         # then for each, that ASCII code to 8-bit binary.
-        binary_message = ''.join(format(ord(char), '08b') for char in message)
+        
+        # We also add a signature at the beginning of the message to check if the image was encoded with this tool when decoding
+        binary_message = ''.join(format(ord(char), '08b') for char in self.signature)
+
+        # We also add the size of the message (in number of characters) as a 5-character string right after the signature
+        # This will be the stop condition when decoding characters from the binary string
+        message_size = str(len(self.signature) + len(message)).zfill(self.message_size_counter_length)
+        binary_message += ''.join(format(ord(char), '08b') for char in message_size)
+
+        # Now we can add the actual message
+        binary_message += ''.join(format(ord(char), '08b') for char in message)
 
         # This counter will check the n-th character from the binary message.
         string_elt_counter = 0
@@ -45,24 +57,56 @@ class SteganoEngine:
     
     
     def decode_message(self, image):
-        # Get the pixel data from the provided image
-        pixels = image.load()
-        binary_retrans = ""
+        has_stegano_signature = False
 
-        for px in range(self.width):
-            for py in range(self.height):
-                rgb_code = pixels[px, py]
-                # The opposite process of encoding: we get the LSB of the red channel
-                binary_retrans += str(rgb_code[0] % 2)
+        try:
+            # Get the pixel data from the provided image
+            pixels = image.load()
+            binary_retrans = ""
 
-        # Now we need to convert the binary string back to ASCII
-        ascii_retrans = ''
-        for i in range(0, len(binary_retrans), 8):
-            # Convert each 8-bit segment to its corresponding character
-            char_to_add = chr(int(binary_retrans[i:i+8], 2))
-            # Stop if we reach the end marker
-            if char_to_add == '\x00':
-                break
-            ascii_retrans += char_to_add
+            for px in range(self.width):
+                for py in range(self.height):
+                    rgb_code = pixels[px, py]
+                    # The opposite process of encoding: we get the LSB of the red channel
+                    binary_retrans += str(rgb_code[0] % 2)
 
-        return ascii_retrans
+            # Now we need to convert the binary string back to ASCII
+            ascii_retrans = ''
+            
+            has_stegano_signature = self.has_signature(binary_retrans)
+
+            if has_stegano_signature:
+                binary_retrans = binary_retrans[self.signature_binary_size:]
+            
+            message_size = self.get_message_size(binary_retrans)
+            binary_retrans = binary_retrans[self.message_size_counter_length * 8:message_size * 8]
+
+            for i in range(0, len(binary_retrans), 8):
+                # Convert each 8-bit segment to its corresponding character
+                char_to_add = chr(int(binary_retrans[i:i+8], 2))
+                ascii_retrans += char_to_add
+
+            return ascii_retrans, has_stegano_signature
+        except Exception as e:
+            if has_stegano_signature:
+                raise Exception(f"An error occurred during decoding: {str(e)}")
+            else:
+                raise Exception(f"No Stegano signature was detected, so the image might not have been encoded with this tool or might not contain any hidden message.\n\nAn error occurred during decoding: {str(e)}.")
+
+
+    def has_signature(self, binary_message):
+        # Extract the beginning of the binary message to check for the signature
+        extracted_signature_binary = binary_message[:self.signature_binary_size]
+        extracted_signature = ''
+        for i in range(0, len(extracted_signature_binary), 8):
+            extracted_signature += chr(int(extracted_signature_binary[i:i+8], 2))
+        return extracted_signature == self.signature
+    
+    def get_message_size(self, extracted_binary_message):
+        # Extract the message size from the binary message
+        end_index = self.message_size_counter_length * 8
+        message_size_binary = extracted_binary_message[:end_index]
+        message_size = ''
+        for i in range(0, len(message_size_binary), 8):
+            message_size += chr(int(message_size_binary[i:i+8], 2))
+        return int(message_size)
