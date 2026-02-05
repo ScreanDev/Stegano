@@ -7,7 +7,7 @@ from fonts_properties import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
-from app.events.call_window import call_encode_window
+from app.events.call_window import call_encode_window, call_decode_window
 
 # ----------------------
 # MAIN WINDOW SETUP
@@ -109,7 +109,7 @@ decode_body_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
 decode_body_desc = Label(decode_body_frame, text="Import an image file to try decoding its hidden message. Scripts embedded within the image will be executed upon decoding.", bg="lightgrey", font=desc_text, wraplength=350, justify=LEFT)
 decode_body_desc.pack(pady=5)
 
-decode_button = Button(decode_body_frame, text="Decode an image", font=body_text)
+decode_button = Button(decode_body_frame, text="Decode an image", font=body_text, command=call_decode_window)
 decode_button.pack(pady=10)
 
 

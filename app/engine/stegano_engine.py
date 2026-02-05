@@ -1,6 +1,11 @@
 from PIL import Image
 
 class SteganoEngine:
+    """
+    A class that provides methods to encode and decode messages within images using steganography techniques.
+    The encoding process modifies the least significant bit (LSB) of the red channel of each pixel to embed the binary representation of the message.
+    The decoding process retrieves the LSBs to reconstruct the original message.
+    """
     def __init__(self, image_path):
         self.image = Image.open(image_path)
         self.pixels = self.image.load()
@@ -16,8 +21,14 @@ class SteganoEngine:
         self.final_img = Image.new('RGB', (self.width, self.height), color='black')
 
     def encode_message(self, message):
-        # Convert each character from the provided message to its ASCII code,
-        # then for each, that ASCII code to 8-bit binary.
+        """
+        Encode a message into the image by modifying the least significant bit of the red channel of each pixel.
+        The process converts each character from the provided message to its ASCII code,
+        then for each, that ASCII code to 8-bit binary.
+        
+        :param self: The instance of the SteganoEngine class.
+        :param message: The message string to encode into the image.
+        """
         
         # We also add a signature at the beginning of the message to check if the image was encoded with this tool when decoding
         binary_message = ''.join(format(ord(char), '08b') for char in self.signature)
@@ -57,6 +68,14 @@ class SteganoEngine:
     
     
     def decode_message(self, image):
+        """
+        Decode a message from the provided image by retrieving the least significant bit of the red channel of each pixel.
+        The process reconstructs the binary string from the LSBs, then converts it back to ASCII characters to retrieve the original message.
+        
+        :param self: The instance of the SteganoEngine class.
+        :param image: The image object from which to decode the message.
+        """
+
         has_stegano_signature = False
 
         try:
@@ -95,6 +114,12 @@ class SteganoEngine:
 
 
     def has_signature(self, binary_message):
+        """
+        Check if the binary message starts with the expected signature to determine if the image was likely encoded with this tool.
+        
+        :param self: The instance of the SteganoEngine class.
+        :param binary_message: The binary string extracted from the image to check for the signature.
+        """
         # Extract the beginning of the binary message to check for the signature
         extracted_signature_binary = binary_message[:self.signature_binary_size]
         extracted_signature = ''
@@ -103,6 +128,12 @@ class SteganoEngine:
         return extracted_signature == self.signature
     
     def get_message_size(self, extracted_binary_message):
+        """
+        Get the size of the hidden message from the extracted binary string.
+        
+        :param self: The instance of the SteganoEngine class.
+        :param extracted_binary_message: The binary string from the image whose signature is extracted containing the message size.
+        """
         # Extract the message size from the binary message
         end_index = self.message_size_counter_length * 8
         message_size_binary = extracted_binary_message[:end_index]

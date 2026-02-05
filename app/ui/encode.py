@@ -7,8 +7,8 @@ from fonts_properties import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
-from app.events.encode_events import load_encoding_ui, select_file_in_explorer
-from app.main import encode_process, decode_process
+from app.events.common_events import load_encoding_ui, select_file_in_explorer
+from app.main import encode_process
 
 file_path = ""
 
@@ -25,11 +25,22 @@ encode_root.resizable(False, False)
 # ----------------------
 # MINIMAL EVENT FUNCTIONS
 # ----------------------
+
 def img_selection_event():
+    """
+    Handle the event when the user clicks the "Browse..." button to select an image file for encoding.
+    Once selected, load the preview UI.
+    """
     global file_path
+    previous_file_path = file_path # Store the previous file path to check if the user cancelled the file selection dialog
     file_path = select_file_in_explorer(file_formats=("Images", "*.png *.jpg *.jpeg"))
-    load_encoding_ui(img_select_frame, file_path)
-    encode_ready_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
+
+    if not (file_path == None or file_path == ""):
+        # UI loading
+        load_encoding_ui(img_select_frame, file_path)
+        encode_ready_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
+    else:
+        file_path = previous_file_path # If the user cancelled the dialog, keep the previous file path
 
 
 # ----------------------
