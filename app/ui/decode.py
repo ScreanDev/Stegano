@@ -7,7 +7,7 @@ from fonts_properties import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
-from app.events.common_events import load_decoding_img_preview, select_file_in_explorer, update_decoded_msg_textbox
+from app.events.common_events import load_decoding_img_preview, select_file_in_explorer, hide_export_container, update_decoded_msg_textbox, copy_to_clipboard
 from app.main import decode_process
 
 file_path = ""
@@ -18,7 +18,6 @@ file_path = ""
 decode_root = Tk()
 decode_root.title("Decode an image")
 decode_root.geometry("800x500")
-decode_root.resizable(False, False)
 
 # ----------------------
 # MINIMAL EVENT FUNCTIONS
@@ -36,11 +35,12 @@ def img_selection_event():
     if not (file_path == None or file_path == ""):
         # UI loading
         load_decoding_img_preview(img_select_frame, file_path)
+        hide_export_container(export_container, create_executable_button) # Hide export options until we know if decoding is successful and if the message is a script
         
         for widget in img_select_frame.winfo_children():
             if hasattr(widget, 'is_decode_button') and widget.is_decode_button:
                 # Specifying properties we could not set when creating the button from common_events.py
-                widget.config(font=button_text, command=lambda: decode_process(img_path=file_path, output_textbox=msg_content_textbox, description_label=decode_placeholder_label))
+                widget.config(font=button_text, command=lambda: decode_process(img_path=file_path, output_textbox=msg_content_textbox, description_label=decode_placeholder_label, load_export_frame=export_container, load_exec_button=create_executable_button))
         update_decoded_msg_textbox(msg_content_textbox, "")
         decode_placeholder_label.config(text="The result of the decoding process will be displayed here.", fg="black")
     else:
@@ -51,6 +51,7 @@ def img_selection_event():
 # ----------------------
 encode_icon = PhotoImage(file="app/assets/ui/encode_icon.png")
 decode_icon = PhotoImage(file="app/assets/ui/decode_icon.png")
+copy_to_clipboard_icon = PhotoImage(file="app/assets/ui/copy_to_clipboard_icon.png")
 
 # ----------------------
 # TITLE SECTION
@@ -110,7 +111,7 @@ img_decode_desc.pack(side=LEFT, pady=5)
 decode_content_frame = Frame(body_frame, bg="#f0f0f0", bd=2, borderwidth=1, relief="solid")
 decode_content_frame.pack(side=RIGHT, padx=10, fill=BOTH, expand=True)
 
-decode_placeholder_label = Label(decode_content_frame, text="The result of the decoding process will be displayed here.", bg="#f0f0f0", fg="black", font=desc_text, wraplength=200, justify=CENTER)
+decode_placeholder_label = Label(decode_content_frame, text="The result of the decoding process will be displayed here.", bg="#f0f0f0", fg="black", font=desc_text, wraplength=400, justify=CENTER)
 decode_placeholder_label.pack(pady=20)
 
 msg_content_container = Frame(decode_content_frame, bg="#ffffff")
@@ -119,6 +120,16 @@ msg_content_container.pack(side=TOP, padx=5, fill=BOTH, expand=True)
 msg_content_textbox = Text(msg_content_container, bg="white", font=smaller_body_text, width=50, height=10, wrap=WORD)
 update_decoded_msg_textbox(msg_content_textbox, "")
 msg_content_textbox.pack(fill=BOTH, expand=True)
+
+# ----------------------
+# EXPORT / EXECUTE SECTION (initially hidden, only shown if decoding is successful)
+# ----------------------
+export_container = Frame(decode_content_frame, bg="lightgray")
+
+copy_content_button = Button(export_container, font=button_text, image=copy_to_clipboard_icon, compound="left", command=lambda: copy_to_clipboard(msg_content_textbox.get("1.0", END)))
+copy_content_button.pack(side=LEFT, padx=20, pady=10)
+
+create_executable_button = Button(export_container, font=button_text, text="Create executable", bg="white")
 
 
 # ----------------------

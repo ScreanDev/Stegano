@@ -15,9 +15,6 @@ from app.events.call_window import call_encode_window, call_decode_window
 root = Tk()
 root.title("Stegano Tools")
 root.geometry("800x400")
-root.resizable(False, False)
-
-
 
 
 

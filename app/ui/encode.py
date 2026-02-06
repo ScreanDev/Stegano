@@ -19,7 +19,6 @@ file_path = ""
 encode_root = Tk()
 encode_root.title("Encode a message within an image")
 encode_root.geometry("800x500")
-encode_root.resizable(False, False)
 
 
 # ----------------------
@@ -37,8 +36,7 @@ def img_selection_event():
 
     if not (file_path == None or file_path == ""):
         # UI loading
-        load_encoding_ui(img_select_frame, file_path)
-        encode_ready_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
+        load_encoding_ui(img_select_frame, file_path, encode_ready_frame)
     else:
         file_path = previous_file_path # If the user cancelled the dialog, keep the previous file path
 
@@ -94,6 +92,10 @@ msg_content_container.pack(side=TOP, padx=20, pady=5, fill=BOTH, expand=True)
 msg_textbox = Text(msg_content_container, bg="white", font=smaller_body_text, width=50, height=10, wrap=WORD)
 msg_textbox.pack(fill=BOTH, expand=True)
 
+mark_as_script_tick = BooleanVar()
+mark_as_script_checkbox = Checkbutton(msg_content_container, text="Mark as a Python script", variable=mark_as_script_tick, bg="#f0f0f0", font=smaller_body_text)
+mark_as_script_checkbox.pack(side=TOP, pady=5, anchor=W)
+
 
 # ----------------------
 # IMAGE SELECTION
@@ -120,10 +122,10 @@ img_select_btn.pack(side=LEFT)
 encode_ready_frame = Frame(encode_root, bg="lightgray", bd=2, borderwidth=2, relief="flat")
 
 encode_ready_label = Label(encode_ready_frame, text="Ready to encode your message!", bg="lightgray", font=bold_body_text)
-encode_ready_label.pack(side=LEFT, padx=30)
+encode_ready_label.pack(side=LEFT, padx=30, pady=10)
 
-encode_button = Button(encode_ready_frame, text="Encode Message", font=button_text, command=lambda: encode_process(img_path=file_path, message=msg_textbox.get("1.0", END)))
-encode_button.pack(side=LEFT, padx=20)
+encode_button = Button(encode_ready_frame, text="Encode Message", font=button_text, command=lambda: encode_process(img_path=file_path, message=msg_textbox.get("1.0", END), is_script=mark_as_script_tick.get()))
+encode_button.pack(side=LEFT, padx=20, pady=10)
 
 
 # ----------------------

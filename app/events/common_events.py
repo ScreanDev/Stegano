@@ -4,12 +4,13 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 
 
-def load_encoding_ui(frame, file_path):
+def load_encoding_ui(frame, file_path, encode_ready_frame):
     """
     Load the encoding UI preview in the given frame with the selected image file.
     
     :param frame: The frame widget where the encoding UI preview will be loaded.
     :param file_path: The path to the image file to be previewed.
+    :param encode_ready_frame: The frame widget for the "ready to encode" section.
     """
     if file_path:
         # Clear previous preview if exists
@@ -31,6 +32,8 @@ def load_encoding_ui(frame, file_path):
         img_label = Label(preview_frame, image=tk_image, bg="white")
         img_label.image = tk_image  # Keep a reference to avoid garbage collection
         img_label.pack()
+
+        encode_ready_frame.pack(side=BOTTOM, fill=X)
 
 
 def load_decoding_img_preview(frame, file_path):
@@ -87,6 +90,18 @@ def select_file_in_explorer(file_formats=None):
     )
     return file_path
 
+
+def hide_export_container(load_export_frame, load_exec_button):
+    """
+    Hide the export options frame from the decoding UI and the create executable button.
+    
+    :param load_export_frame: The frame widget containing the export options to be hidden.
+    :param load_exec_button: The button widget for creating an executable to be hidden.
+    """
+    load_export_frame.pack_forget()
+    load_exec_button.pack_forget()
+
+
 # Utility function to update decoded message textbox, preventing user's edits
 def update_decoded_msg_textbox(textbox, message):
     """
@@ -100,3 +115,17 @@ def update_decoded_msg_textbox(textbox, message):
     textbox.delete(1.0, END)
     textbox.insert("1.0", message)
     textbox.config(state=DISABLED)
+
+
+def copy_to_clipboard(text):
+    """
+    Copy the given text to the system clipboard.
+    
+    :param text: The string text to be copied to the clipboard.
+    """
+    root = Tk()
+    root.withdraw()  # Hide the root window
+    root.clipboard_clear()  # Clear the clipboard
+    root.clipboard_append(text)  # Append the text to the clipboard
+    root.update()  # Update the clipboard
+    root.destroy()  # Destroy the root window
