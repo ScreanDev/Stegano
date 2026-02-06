@@ -7,7 +7,7 @@ from fonts_properties import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
-from app.events.common_events import load_decoding_img_preview, select_file_in_explorer, hide_export_container, update_decoded_msg_textbox, copy_to_clipboard
+from app.events.common_events import load_decoding_img_preview, select_file_in_explorer, hide_export_container, update_decoded_msg_textbox, copy_to_clipboard, resource_path
 from app.main import decode_process
 
 file_path = ""
@@ -34,13 +34,13 @@ def img_selection_event():
 
     if not (file_path == None or file_path == ""):
         # UI loading
-        load_decoding_img_preview(img_select_frame, file_path)
+        load_decoding_img_preview(img_select_frame, resource_path(file_path))
         hide_export_container(export_container, create_executable_button) # Hide export options until we know if decoding is successful and if the message is a script
         
         for widget in img_select_frame.winfo_children():
             if hasattr(widget, 'is_decode_button') and widget.is_decode_button:
                 # Specifying properties we could not set when creating the button from common_events.py
-                widget.config(font=button_text, command=lambda: decode_process(img_path=file_path, output_textbox=msg_content_textbox, description_label=decode_placeholder_label, load_export_frame=export_container, load_exec_button=create_executable_button))
+                widget.config(font=button_text, command=lambda: decode_process(img_path=resource_path(file_path), output_textbox=msg_content_textbox, description_label=decode_placeholder_label, load_export_frame=export_container, load_exec_button=create_executable_button))
         update_decoded_msg_textbox(msg_content_textbox, "")
         decode_placeholder_label.config(text="The result of the decoding process will be displayed here.", fg="black")
     else:
@@ -49,9 +49,9 @@ def img_selection_event():
 # ----------------------
 # ICONS / CANVAS LOADING
 # ----------------------
-encode_icon = PhotoImage(file="app/assets/ui/encode_icon.png")
-decode_icon = PhotoImage(file="app/assets/ui/decode_icon.png")
-copy_to_clipboard_icon = PhotoImage(file="app/assets/ui/copy_to_clipboard_icon.png")
+encode_icon = PhotoImage(file=resource_path("app/assets/ui/encode_icon.png"))
+decode_icon = PhotoImage(file=resource_path("app/assets/ui/decode_icon.png"))
+copy_to_clipboard_icon = PhotoImage(file=resource_path("app/assets/ui/copy_to_clipboard_icon.png"))
 
 # ----------------------
 # TITLE SECTION

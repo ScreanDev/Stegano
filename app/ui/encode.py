@@ -7,7 +7,7 @@ from fonts_properties import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
-from app.events.common_events import load_encoding_ui, select_file_in_explorer
+from app.events.common_events import load_encoding_ui, select_file_in_explorer, resource_path
 from app.main import encode_process
 
 file_path = ""
@@ -36,7 +36,7 @@ def img_selection_event():
 
     if not (file_path == None or file_path == ""):
         # UI loading
-        load_encoding_ui(img_select_frame, file_path, encode_ready_frame)
+        load_encoding_ui(img_select_frame, resource_path(file_path), encode_ready_frame)
     else:
         file_path = previous_file_path # If the user cancelled the dialog, keep the previous file path
 
@@ -44,8 +44,8 @@ def img_selection_event():
 # ----------------------
 # ICONS / CANVAS LOADING
 # ----------------------
-encode_icon = PhotoImage(file="app/assets/ui/encode_icon.png")
-decode_icon = PhotoImage(file="app/assets/ui/decode_icon.png")
+encode_icon = PhotoImage(file=resource_path("app/assets/ui/encode_icon.png"))
+decode_icon = PhotoImage(file=resource_path("app/assets/ui/decode_icon.png"))
 
 
 # ----------------------
@@ -124,7 +124,7 @@ encode_ready_frame = Frame(encode_root, bg="lightgray", bd=2, borderwidth=2, rel
 encode_ready_label = Label(encode_ready_frame, text="Ready to encode your message!", bg="lightgray", font=bold_body_text)
 encode_ready_label.pack(side=LEFT, padx=30, pady=10)
 
-encode_button = Button(encode_ready_frame, text="Encode Message", font=button_text, command=lambda: encode_process(img_path=file_path, message=msg_textbox.get("1.0", END), is_script=mark_as_script_tick.get()))
+encode_button = Button(encode_ready_frame, text="Encode Message", font=button_text, command=lambda: encode_process(img_path=resource_path(file_path), message=msg_textbox.get("1.0", END), is_script=mark_as_script_tick.get()))
 encode_button.pack(side=LEFT, padx=20, pady=10)
 
 

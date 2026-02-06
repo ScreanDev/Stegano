@@ -1,4 +1,5 @@
 import os
+import sys
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk
@@ -129,3 +130,18 @@ def copy_to_clipboard(text):
     root.clipboard_append(text)  # Append the text to the clipboard
     root.update()  # Update the clipboard
     root.destroy()  # Destroy the root window
+
+def resource_path(relative_path):
+    """
+    Get absolute path to resource, works for dev and for PyInstaller
+    
+    :param relative_path: The relative path to the resource file.
+    :return: The absolute path to the resource file.
+    """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
