@@ -20,7 +20,7 @@ class SteganoEngine:
         # Create a new image with RGB mode and black background
         self.final_img = Image.new('RGB', (self.width, self.height), color='black')
 
-    def encode_message(self, message):
+    def encode_message(self, message, is_script=False):
         """
         Encode a message into the image by modifying the least significant bit of the red channel of each pixel.
         The process converts each character from the provided message to its ASCII code,
@@ -33,9 +33,15 @@ class SteganoEngine:
         # We also add a signature at the beginning of the message to check if the image was encoded with this tool when decoding
         binary_message = ''.join(format(ord(char), '08b') for char in self.signature)
 
+        # Then we add a bit right after the signature to mark if the message is a Python script or not
+        if is_script:
+            binary_message += ''.join(format(ord("1"), '08b'))
+        else:
+            binary_message += ''.join(format(ord("0"), '08b'))
+
         # We also add the size of the message (in number of characters) as a 5-character string right after the signature
         # This will be the stop condition when decoding characters from the binary string
-        message_size = str(len(self.signature) + len(message)).zfill(self.message_size_counter_length)
+        message_size = str(len(self.signature) + 1 + len(message)).zfill(self.message_size_counter_length)
         binary_message += ''.join(format(ord(char), '08b') for char in message_size)
 
         # Now we can add the actual message
@@ -77,6 +83,7 @@ class SteganoEngine:
         """
 
         has_stegano_signature = False
+        is_script = False
 
         try:
             # Get the pixel data from the provided image
@@ -96,6 +103,9 @@ class SteganoEngine:
 
             if has_stegano_signature:
                 binary_retrans = binary_retrans[self.signature_binary_size:]
+                # After the signature, we have a bit to check if the message is a Python script or not
+                is_script = self.is_script(binary_retrans)
+                binary_retrans = binary_retrans[8:]
             
             message_size = self.get_message_size(binary_retrans)
             binary_retrans = binary_retrans[self.message_size_counter_length * 8:message_size * 8]
@@ -105,7 +115,7 @@ class SteganoEngine:
                 char_to_add = chr(int(binary_retrans[i:i+8], 2))
                 ascii_retrans += char_to_add
 
-            return ascii_retrans, has_stegano_signature
+            return ascii_retrans, has_stegano_signature, is_script
         except Exception as e:
             if has_stegano_signature:
                 raise Exception(f"An error occurred during decoding: {str(e)}")
@@ -132,7 +142,7 @@ class SteganoEngine:
         Get the size of the hidden message from the extracted binary string.
         
         :param self: The instance of the SteganoEngine class.
-        :param extracted_binary_message: The binary string from the image whose signature is extracted containing the message size.
+        :param extracted_binary_message: The binary string from the image whose signature & script bit are extracted containing the message size.
         """
         # Extract the message size from the binary message
         end_index = self.message_size_counter_length * 8
@@ -141,3 +151,15 @@ class SteganoEngine:
         for i in range(0, len(message_size_binary), 8):
             message_size += chr(int(message_size_binary[i:i+8], 2))
         return int(message_size)
+    
+
+    def is_script(self, extracted_binary_message):
+        """
+        Check if the message is marked as a Python script by looking at the bit right after the signature in the binary message.
+        
+        :param self: The instance of the SteganoEngine class.
+        :param extracted_binary_message: The binary string from the image whose signature is extracted containing the script bit.
+        """
+        # Extract the bit right after the signature to check if it's a Python script or not
+        script_bit_binary = chr(int(extracted_binary_message[:8], 2))
+        return script_bit_binary == str(1)
