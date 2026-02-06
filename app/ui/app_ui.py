@@ -3,11 +3,11 @@
 from pathlib import Path
 import sys
 from tkinter import *
-from fonts_properties import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
 from app.events.call_window import call_encode_window, call_decode_window
+from app.ui.fonts_properties import *
 
 # ----------------------
 # MAIN WINDOW SETUP
@@ -76,7 +76,7 @@ encode_body_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
 encode_body_desc = Label(encode_body_frame, text="Encode a message into an image file seamlessly. You can even inject Python scripts within the picture, then execute it by decoding the generated image.", bg="lightgrey", font=desc_text, wraplength=350, justify=LEFT)
 encode_body_desc.pack(pady=5)
 
-encode_button = Button(encode_body_frame, text="Encode an image", font=body_text, command=call_encode_window)
+encode_button = Button(encode_body_frame, text="Encode an image", font=body_text, command=lambda: call_encode_window(root))
 encode_button.pack(pady=10)
 
 # ----------------------
@@ -106,8 +106,9 @@ decode_body_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
 decode_body_desc = Label(decode_body_frame, text="Import an image file to try decoding its hidden message. Scripts embedded within the image will be executed upon decoding.", bg="lightgrey", font=desc_text, wraplength=350, justify=LEFT)
 decode_body_desc.pack(pady=5)
 
-decode_button = Button(decode_body_frame, text="Decode an image", font=body_text, command=call_decode_window)
+decode_button = Button(decode_body_frame, text="Decode an image", font=body_text, command=lambda: call_decode_window(root))
 decode_button.pack(pady=10)
 
+# ----------------------
 
-root.mainloop()
+root.protocol("WM_DELETE_WINDOW", root.quit)

@@ -138,10 +138,13 @@ def resource_path(relative_path):
     :param relative_path: The relative path to the resource file.
     :return: The absolute path to the resource file.
     """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
+    if getattr(sys, 'frozen', False):
+        # We are running the compiled executable.
+        # sys.executable points to the .exe path
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # We are in a normal Python environment,
+        # so we can use the current file's directory as the base path
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
