@@ -1,8 +1,14 @@
 import os
 import sys
+from pathlib import Path
+import tempfile
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk
+
+path_root = Path(__file__).parents[2]
+sys.path.insert(0, str(path_root))
+from app.ui.create_exec_user_consent import run_create_exec_user_consent_ui
 
 
 def load_encoding_ui(frame, file_path, encode_ready_frame):
@@ -91,6 +97,38 @@ def select_file_in_explorer(file_formats=None):
     )
     return file_path
 
+def select_folder_in_explorer():
+    """
+    Open a folder dialog for the user to select a directory.
+
+    :param new_file_name_select: A boolean indicating whether the user should be prompted to enter a new file name after selecting the folder.    
+    :return: The path to the selected directory.
+    """
+    root = Tk()
+    root.withdraw()
+    
+    folder_path = filedialog.askdirectory(
+        title="Select a Folder"
+    )
+    return folder_path
+
+def select_save_file_in_explorer(default_file_name="output.py"):
+    """
+    Open a save file dialog for the user to select a location and name for saving a file.
+    
+    :param default_file_name: The default file name to be suggested in the save dialog.
+    :return: The path to the selected file location.
+    """
+    root = Tk()
+    root.withdraw()
+    
+    file_path = filedialog.asksaveasfilename(
+        title="Save File As",
+        defaultextension=".py",
+        initialfile=default_file_name,
+        filetypes=[("Python Files", "*.py")]
+    )
+    return file_path
 
 def hide_export_container(load_export_frame, load_exec_button):
     """
@@ -116,6 +154,18 @@ def update_decoded_msg_textbox(textbox, message):
     textbox.delete(1.0, END)
     textbox.insert("1.0", message)
     textbox.config(state=DISABLED)
+
+
+def create_executable(content, parent_window, default_file_name="decoded_message.py"):
+    if not run_create_exec_user_consent_ui(parent_window):
+        return
+
+    file_path = select_save_file_in_explorer(default_file_name=default_file_name)
+
+    if file_path:
+        # Create a new file in the selected directory with a unique name
+        with open(file_path, 'w') as f:
+            f.write(content)
 
 
 def copy_to_clipboard(text):

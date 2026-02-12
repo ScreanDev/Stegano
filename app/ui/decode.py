@@ -6,7 +6,7 @@ from tkinter import *
 
 path_root = Path(__file__).parents[2]
 sys.path.insert(0, str(path_root))
-from app.events.common_events import load_decoding_img_preview, select_file_in_explorer, hide_export_container, update_decoded_msg_textbox, copy_to_clipboard, resource_path
+from app.events.common_events import load_decoding_img_preview, select_file_in_explorer, hide_export_container, update_decoded_msg_textbox, create_executable, copy_to_clipboard, resource_path
 from app.engine.app_process import decode_process
 from app.ui.fonts_properties import *
 
@@ -37,12 +37,12 @@ def run_decode_ui(parent_window):
             # UI loading
             load_decoding_img_preview(img_select_frame, resource_path(file_path))
             hide_export_container(export_container, create_executable_button) # Hide export options until we know if decoding is successful and if the message is a script
+            update_decoded_msg_textbox(msg_content_textbox, "\x00")
             
             for widget in img_select_frame.winfo_children():
                 if hasattr(widget, 'is_decode_button') and widget.is_decode_button:
                     # Specifying properties we could not set when creating the button from common_events.py
                     widget.config(font=button_text, command=lambda: decode_process(img_path=resource_path(file_path), output_textbox=msg_content_textbox, description_label=decode_placeholder_label, load_export_frame=export_container, load_exec_button=create_executable_button))
-            update_decoded_msg_textbox(msg_content_textbox, "")
             decode_placeholder_label.config(text="The result of the decoding process will be displayed here.", fg="black")
         else:
             file_path = previous_file_path # If the user cancelled the dialog, keep the previous file path
@@ -127,10 +127,10 @@ def run_decode_ui(parent_window):
     # ----------------------
     export_container = Frame(decode_content_frame, bg="lightgray")
 
-    copy_content_button = Button(export_container, font=button_text, image=copy_to_clipboard_icon, compound="left", command=lambda: copy_to_clipboard(msg_content_textbox.get("1.0", END)))
+    copy_content_button = Button(export_container, font=button_text, image=copy_to_clipboard_icon, compound="left", command=lambda: copy_to_clipboard(msg_content_textbox.get("1.0", "end-1c")))
     copy_content_button.pack(side=LEFT, padx=20, pady=10)
 
-    create_executable_button = Button(export_container, font=button_text, text="Create executable", bg="white")
+    create_executable_button = Button(export_container, font=button_text, text="Create executable", bg="white", command=lambda: create_executable(msg_content_textbox.get("1.0", "end-1c"), decode_root, Path(file_path).name))
 
 
     # ----------------------

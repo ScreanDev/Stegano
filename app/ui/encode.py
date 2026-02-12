@@ -123,7 +123,7 @@ def run_encode_ui(parent_window):
     encode_ready_label = Label(encode_ready_frame, text="Ready to encode your message!", bg="lightgray", font=bold_body_text)
     encode_ready_label.pack(side=LEFT, padx=30, pady=10)
 
-    encode_button = Button(encode_ready_frame, text="Encode Message", font=button_text, command=lambda: encode_process(img_path=resource_path(file_path), message=msg_textbox.get("1.0", END), is_script=mark_as_script_tick.get()))
+    encode_button = Button(encode_ready_frame, text="Encode Message", font=button_text, command=lambda: encode_process(img_path=resource_path(file_path), message=msg_textbox.get("1.0", "end-1c"), is_script=mark_as_script_tick.get()))
     encode_button.pack(side=LEFT, padx=20, pady=10)
 
 
