@@ -1,5 +1,5 @@
 @echo off
-echo --- Verification de l'installation de Python ---
+echo --- Checking Python installation ---
 python --version
 IF %ERRORLEVEL% NEQ 0 (
     echo ERROR: Python not found
@@ -8,7 +8,7 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo --- Creation de l'environnement virtuel (venv) ---
+echo --- Creating virtual environment ---
 
 if exist venv (
     echo Virtual environment already exists
@@ -32,4 +32,5 @@ pip install cx_Freeze Pillow
 
 echo.
 echo --- Installation complete ---
+echo TROUBLESHOOTING: If you keep having issues with unfound modules, ensure you use the Python interpreter of this virtual environment.
 pause
