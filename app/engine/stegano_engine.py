@@ -41,7 +41,7 @@ class SteganoEngine:
 
         # We also add the size of the message (in number of characters) as a 5-character string right after the signature
         # This will be the stop condition when decoding characters from the binary string
-        message_size = str(len(self.signature) + 1 + len(message)).zfill(self.message_size_counter_length)
+        message_size = str(len(self.signature) + 1 + self.message_size_counter_length + len(message)).zfill(self.message_size_counter_length)
         binary_message += ''.join(format(ord(char), '08b') for char in message_size)
 
         # Now we can add the actual message
@@ -108,7 +108,7 @@ class SteganoEngine:
                 binary_retrans = binary_retrans[8:]
             
             message_size = self.get_message_size(binary_retrans)
-            binary_retrans = binary_retrans[self.message_size_counter_length * 8:message_size * 8]
+            binary_retrans = binary_retrans[self.message_size_counter_length * 8:(message_size * 8) - 8 - self.signature_binary_size if has_stegano_signature else 0]
 
             for i in range(0, len(binary_retrans), 8):
                 # Convert each 8-bit segment to its corresponding character
