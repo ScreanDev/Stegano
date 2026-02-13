@@ -21,6 +21,11 @@ def run_create_exec_user_consent_ui(parent_window):
     # MINIMAL EVENT FUNCTIONS
     # ----------------------
 
+    def quit_window(user_consent_value):
+        consent_checkbox.config(variable=BooleanVar(value=user_consent_value))
+        user_consent.set(user_consent_value)
+        user_consent_root.destroy()
+
     # ----------------------
     # ICONS / CANVAS LOADING
     # ----------------------
@@ -72,10 +77,10 @@ def run_create_exec_user_consent_ui(parent_window):
     consent_checkbox = Checkbutton(body_frame, text="I have read and understood the above information, and I accept the terms and conditions for creating an executable.", variable=user_consent, bg="#f0f0f0", font=desc_text_bold, wraplength=750, justify=LEFT, command=lambda: create_executable_button.config(state=NORMAL if user_consent.get() else DISABLED))
     consent_checkbox.pack(padx=20, pady=10, anchor=W)
 
-    create_executable_button = Button(body_frame, text="Create executable", font=button_text, state=DISABLED, command=lambda: user_consent_root.destroy())
+    create_executable_button = Button(body_frame, text="Create executable", font=button_text, state=DISABLED, command=lambda: quit_window(True))
     create_executable_button.pack(padx=20, pady=10, anchor=E)
 
-    user_consent_root.protocol("WM_DELETE_WINDOW", user_consent_root.destroy)
+    user_consent_root.protocol("WM_DELETE_WINDOW", lambda: quit_window(False))
     user_consent_root.transient(parent_window)
     user_consent_root.grab_set()
     parent_window.wait_window(user_consent_root)
